@@ -91,7 +91,7 @@
 #    ON (default) = Will require "enable_language(OBJC) and/or enable_language(OBJCXX)" for full OBJC|OBJCXX support
 #    OFF = Will embed the OBJC and OBJCXX flags into the CMAKE_C_FLAGS and CMAKE_CXX_FLAGS (legacy behavior, CMake version < 3.16)
 #
-# ENABLE_BITCODE: (ON|OFF) Enables or disables bitcode support. Default ON
+# ENABLE_BITCODE: (ON|OFF) Enables or disables bitcode support. Default OFF
 #
 # ENABLE_ARC: (ON|OFF) Enables or disables ARC support. Default ON (ARC enabled by default)
 #
@@ -526,12 +526,13 @@ elseif(DEFINED CMAKE_OSX_SYSROOT_INT)
 endif()
 
 # Use bitcode or not
-if(NOT DEFINED ENABLE_BITCODE AND NOT ARCHS MATCHES "((^|;|, )(i386|x86_64))+")
-  # Unless specified, enable bitcode support by default
-  message(STATUS "[DEFAULTS] Enabling bitcode support by default. ENABLE_BITCODE not provided!")
-  set(ENABLE_BITCODE ON)
-elseif(NOT DEFINED ENABLE_BITCODE)
-  message(STATUS "[DEFAULTS] Disabling bitcode support by default on simulators. ENABLE_BITCODE not provided for override!")
+if(NOT DEFINED ENABLE_BITCODE)
+  # Unless specified, disable bitcode support by default
+  message(STATUS "[DEFAULTS] Disabling bitcode support by default. ENABLE_BITCODE not provided for override!")
+  set(ENABLE_BITCODE OFF)
+elseif(ENABLE_BITCODE AND ARCHS MATCHES "((^|;|, )(i386|x86_64))+")
+  # Even if specified, disable bitcode support with iOS x86 architecture presuming simulators
+  message(STATUS "[DEFAULTS] Disabling bitcode support with iOS x86 architecture presuming simulators. ENABLE_BITCODE is overridden!")
   set(ENABLE_BITCODE OFF)
 endif()
 set(ENABLE_BITCODE_INT ${ENABLE_BITCODE} CACHE BOOL
